@@ -9,14 +9,15 @@
           amazon.aws.ec2_instance:
             key_name: login
             instance_type: t2.micro
-            image: ami-05c8ca4485f8b138a
+            image_id: ami-05c8ca4485f8b138a
             wait: yes
-            group: cloud9
+            security_group: cloud9
             region: ap-south-1
             count: 1
             vpc_subnet_id: subnet-0755e81cac0c08336
-            assign_public_ip: yes
-            instance_tags:
+            network:
+              assign_public_ip: yes
+            tags:
               Name: Bastion Instance
           register: ec2_output
           tags:
