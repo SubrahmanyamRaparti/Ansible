@@ -1,0 +1,82 @@
+---
+  - name: AWS EC2 Playbook
+    hosts: localhost
+    connection: local
+    tasks:
+      - ping:
+      - block:
+        - name: Create a EC2 instance
+          amazon.aws.ec2_instance:
+            key_name: login
+            instance_type: t2.micro
+            image: ami-05c8ca4485f8b138a
+            wait: yes
+            group: cloud9
+            region: ap-south-1
+            count: 1
+            vpc_subnet_id: subnet-0755e81cac0c08336
+            assign_public_ip: yes
+            instance_tags:
+              Name: Bastion Instance
+          register: ec2_output
+          tags:
+            - ec2-create
+            - never
+        - name: Copy EC2 output log to a text file 
+          copy:
+            content: '{{ ec2_output }}'
+            dest: instance_ids.txt
+          tags:
+            - ec2-create
+            - never
+        - name: Prepare YAML file for include vars to further start/stop/terminate
+          template:
+            src: instance_ids.j2
+            dest: instance_ids.yml
+          tags:
+            - ec2-create
+            - never
+        - name: Include variables from YAML file
+          include_vars: instance_ids.yml
+          tags:
+            - always
+
+      - name: Start an EC2 instance
+        ec2_instance:
+          instance_ids: '{{instance_id}}'
+          region: '{{aws_region}}'
+          state: running
+          wait: yes
+        tags:
+          - ec2-start
+          - never
+
+      - name: Restart an EC2 instance
+        ec2_instance:
+          instance_ids: '{{instance_id}}'
+          region: '{{aws_region}}'
+          state: restarted
+          wait: yes
+        tags:
+          - ec2-restart
+          - never
+
+      - name: Stop an EC2 instance
+        ec2_instance:
+          instance_ids: '{{instance_id}}'
+          region: '{{aws_region}}'
+          state: stopped
+          wait: yes
+        tags:
+          - ec2-stop
+          - never
+
+      - name: Terminate an EC2 instance
+        ec2_instance:
+          instance_ids: '{{instance_id}}'
+          region: '{{aws_region}}'
+          state: absent
+          wait: yes
+        tags:
+          - ec2-terminate
+          - never
