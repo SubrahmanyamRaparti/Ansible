@@ -1,0 +1,17 @@
+ansible node1 -i inventory.txt -m copy -a "src=./server_IP.txt dest=./from_server_IP.txt"
+
+ansible node1 -i inventory.txt -m fetch -a "src=./demo.txt dest=./{{inventory_hostname}}_demo.txt flat=yes"
+
+ansible node1 -i inventory.txt -m file -a "path=~/from_server_IP.txt state=absent"
+
+ansible node1 -i inventory.txt -m file -a "path=~/from_server_IP.txt state=touch" --become
+
+ansible node1 -i inventory.txt -m file -a "path=~/from_server_IP.txt state=directory" --become
+
+ansible node1 -i inventory.txt -m yum -a "name=git state=present" --become
+
+ansible node1 -i inventory.txt -m yum -a "name=git state=removed" --become
+
+ansible all -i inventory.txt --list-hosts
+
+ansible all -i inventory.txt -m debug -a "var=groups.keys()"

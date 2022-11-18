@@ -1,0 +1,94 @@
+---
+  - name: Sample Ansible Playbook Play 1
+    gather_facts: true
+    hosts: nodes
+    vars:
+      - owner: Subrahmanyam
+      - packages:
+        - nginx
+        - mysql
+        - firewalld
+        - postgresql
+      - package_manager:
+          RedHat : yum
+          ubuntu : apt-get
+    vars_prompt:
+      - name: username
+        prompt: Enter the username
+        private: false
+      - name: password
+        prompt: Enter the password
+        private: true
+    tasks:
+      - name: Sample message task using debug module
+        debug:
+          msg:
+            - Playbook owner is {{owner}}
+            - Running Sample Ansible Playbook on host '{{ansible_host}}' with user '{{ansible_user}}'
+            - Packages datatype is {{packages[0] | type_debug}}
+            - Username is {{username}} and passkey is {{password}}
+
+      - name: Sample variable task using debug module
+        debug:
+          var: package_manager['RedHat']
+      
+      - name: Get Bash version using command module
+        command: bash --version
+        register: version
+        changed_when: false
+      
+      - name: Set a fact (Set a variable while executing the playbook)
+        set_fact:
+          bash_version: "{{version['stdout_lines'][0].split()[3]}}"
+      
+      - name: Display bash version
+        debug:
+          var: bash_version
+
+      - name: Install a package
+        yum:
+          name: "{{item}}"
+          state: absent
+        loop: "{{packages}}"
+        notify:
+          - start service
+        become: yes
+        register: nginx_output
+
+    handlers:
+      - name: start service
+        service:
+          name: nginx
+          state: started
+        become: yes
+        # when: "{{'Installed' in nginx_output['results'][0]}}"
+        ignore_errors: yes
+  
+  - name: Sample Ansible Playbook Play 2
+    gather_facts: true
+    hosts: local
+    vars:
+      current_time: "{{time['stdout'].split()[3]}}"
+      p: 10
+      q: 5
+      r: 50
+      arry: ['D','E','V','O','P','S']
+    tasks:
+      - name: Task will fail return code of the time command is NOT 0
+        command: date
+        register: time
+        failed_when: time['rc'] != 0
+        changed_when: false
+
+      - name: Display time
+        debug:
+          var: current_time
+
+      - name: inline conditions
+        debug:
+          msg: "{{2 if 2 > 4 else 4}}"
+        
+      - name: Sample Jinja 2 template
+        template: 
+          src: jinja2-sample-tpl.j2
+          dest: ./Ansible/AnsibleNotes/jinja2-sample-tpl-output.txt

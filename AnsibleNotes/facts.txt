@@ -1,0 +1,21 @@
+With Ansible you can retrieve or discover certain variables containing information about your remote systems or 
+about Ansible itself. Variables related to remote systems are called facts. With facts, you can use the behavior
+or state of one system as configuration on other systems.
+
+Facts:
+    \_ Default facts
+    \_ Custom facts
+
+ansible localhost -i inventory.txt -m setup
+
+Steps to create custom ansible facts
+=> Create directory /etc/ansible/facts.d on the ansible managed nodes
+=> Create a python or bash script to program with extension <program name>.fact
+=> Output of the program should be in json format
+=> Give execution permission
+
+Example:
+$ ansible localhost -i inventory.txt -m file -a "path=/etc/ansible/facts.d state=directory" --become
+$ ansible localhost -i inventory.txt -m copy -a "src=../CustomFacts/ansible_package_versions.fact 
+  dest=/etc/ansible/facts.d/ mode=0755" --become
+$ ansible localhost -i inventory.txt -m setup -a "filter=ansible_local"

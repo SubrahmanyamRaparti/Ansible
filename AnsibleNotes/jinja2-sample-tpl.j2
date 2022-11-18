@@ -1,0 +1,25 @@
+{% if p < q %}
+Big number is {{p}}
+{% endif -%}
+
+{% if p > q %}
+Big number is {{p}}
+{% else %}
+Big number is {{q}}
+{% endif -%}
+
+{% if (p > q) and (p > r) %}
+Big number is {{p}}
+{% elif (q > p) and (q > r) %}
+Big number is {{q}}
+{% else %}
+Big number is {{r}}
+{% endif -%}
+
+{% for _ in arry %}
+{{_}}
+{% endfor -%}
+
+{% for _ in arry %}
+{{_}}
+{%- endfor %}
